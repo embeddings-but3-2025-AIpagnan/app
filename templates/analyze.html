@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Analyse de Texte - Application LLM{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">📊 Analyse de Texte</h4>
+            </div>
+            <div class="card-body">
+                <form id="analyze-form">
+                    <div class="mb-3">
+                        <label for="text-input" class="form-label">Texte à analyser</label>
+                        <textarea id="text-input" class="form-control" rows="8" placeholder="Collez ou tapez votre texte ici..." required></textarea>
+                        <div class="form-text">Entrez le texte que vous souhaitez analyser.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="analysis-type" class="form-label">Type d'analyse</label>
+                        <select id="analysis-type" class="form-select" required>
+                            <option value="">Choisissez le type d'analyse</option>
+                            <option value="summary">Résumé</option>
+                            <option value="sentiment">Analyse de sentiment</option>
+                            <option value="keywords">Extraction de mots-clés</option>
+                            <option value="length">Statistiques de longueur</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Analyser</button>
+                </form>
+            </div>
+        </div>
+        
+        <div id="results-card" class="card mt-4" style="display: none;">
+            <div class="card-header">
+                <h5 class="mb-0">Résultats de l'analyse</h5>
+            </div>
+            <div class="card-body">
+                <div id="analysis-results"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const analyzeForm = document.getElementById('analyze-form');
+    const textInput = document.getElementById('text-input');
+    const analysisType = document.getElementById('analysis-type');
+    const resultsCard = document.getElementById('results-card');
+    const analysisResults = document.getElementById('analysis-results');
+
+    analyzeForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const text = textInput.value.trim();
+        const type = analysisType.value;
+        
+        if (!text || !type) return;
+
+        // Show loading
+        resultsCard.style.display = 'block';
+        analysisResults.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div><p class="mt-2">Analyse en cours...</p></div>';
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    text: text,
+                    analysis_type: type
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                displayResults(data.result, type);
+            } else {
+                analysisResults.innerHTML = '<div class="alert alert-danger">Erreur lors de l\'analyse.</div>';
+            }
+        } catch (error) {
+            analysisResults.innerHTML = '<div class="alert alert-danger">Erreur de connexion au serveur.</div>';
+        }
+    });
+
+    function displayResults(result, type) {
+        let html = '';
+        
+        switch (type) {
+            case 'summary':
+                html = `<div class="alert alert-info"><strong>Résumé:</strong><br>${result}</div>`;
+                break;
+            case 'sentiment':
+                html = `<div class="alert alert-info"><strong>Sentiment:</strong> ${result}</div>`;
+                break;
+            case 'keywords':
+                html = `<div class="alert alert-info"><strong>Mots-clés:</strong><br>${result.join(', ')}</div>`;
+                break;
+            case 'length':
+                html = `
+                    <div class="row">
+                        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h6>Caractères</h6><h4>${result.characters}</h4></div></div></div>
+                        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h6>Mots</h6><h4>${result.words}</h4></div></div></div>
+                        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h6>Phrases</h6><h4>${result.sentences}</h4></div></div></div>
+                        <div class="col-md-3"><div class="card"><div class="card-body text-center"><h6>Paragraphes</h6><h4>${result.paragraphs}</h4></div></div></div>
+                    </div>
+                `;
+                break;
+            default:
+                html = `<div class="alert alert-info">${result}</div>`;
+        }
+        
+        analysisResults.innerHTML = html;
+    }
+});
+</script>
+{% endblock %}

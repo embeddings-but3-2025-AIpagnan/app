@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil - Application LLM{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4">Bienvenue dans l'Application LLM</h1>
+            <p class="lead">Une application Flask pour implémenter les fonctionnalités intelligentes du LLM</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">💬 Chat Intelligent</h5>
+                        <p class="card-text">Interagissez avec un assistant IA pour poser des questions et obtenir des réponses intelligentes.</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-primary">Démarrer le chat</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">📊 Analyse de Texte</h5>
+                        <p class="card-text">Analysez du texte pour obtenir des insights, des résumés et des analyses de sentiment.</p>
+                        <a href="{{ url_for('analyze') }}" class="btn btn-primary">Analyser du texte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">🚀 Fonctionnalités Disponibles</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Interface de chat conversationnel</li>
+                            <li class="list-group-item">Analyse et résumé de texte</li>
+                            <li class="list-group-item">Traitement de texte en temps réel</li>
+                            <li class="list-group-item">Interface web responsive</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - Application LLM{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">💬 Chat Intelligent</h4>
+            </div>
+            <div class="card-body">
+                <div id="chat-messages" class="mb-3" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px;">
+                    <div class="text-muted text-center">
+                        <p>Commencez une conversation en tapant votre message ci-dessous.</p>
+                    </div>
+                </div>
+                
+                <form id="chat-form">
+                    <div class="input-group">
+                        <input type="text" id="message-input" class="form-control" placeholder="Tapez votre message ici..." required>
+                        <button type="submit" class="btn btn-primary">Envoyer</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                💡 Conseil: Posez des questions claires et spécifiques pour obtenir de meilleures réponses.
+            </small>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chat-form');
+    const messageInput = document.getElementById('message-input');
+    const chatMessages = document.getElementById('chat-messages');
+
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message to chat
+        addMessage(message, 'user');
+        messageInput.value = '';
+
+        // Show typing indicator
+        const typingDiv = addMessage('Assistant tape...', 'assistant', true);
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            
+            // Remove typing indicator
+            typingDiv.remove();
+            
+            if (data.success) {
+                addMessage(data.response, 'assistant');
+            } else {
+                addMessage('Désolé, une erreur s\'est produite.', 'assistant');
+            }
+        } catch (error) {
+            typingDiv.remove();
+            addMessage('Erreur de connexion au serveur.', 'assistant');
+        }
+    });
+
+    function addMessage(text, sender, isTyping = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `mb-3 ${sender === 'user' ? 'text-end' : 'text-start'}`;
+        
+        const badge = sender === 'user' ? 'bg-primary' : 'bg-secondary';
+        const senderName = sender === 'user' ? 'Vous' : 'Assistant';
+        
+        messageDiv.innerHTML = `
+            <div class="d-inline-block">
+                <small class="badge ${badge} mb-1">${senderName}</small>
+                <div class="p-2 rounded ${sender === 'user' ? 'bg-primary text-white' : 'bg-light'}" style="max-width: 300px;">
+                    ${text}
+                </div>
+            </div>
+        `;
+        
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        
+        return messageDiv;
+    }
+});
+</script>
+{% endblock %}
