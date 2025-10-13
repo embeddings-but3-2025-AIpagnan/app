@@ -4,3 +4,19 @@ body {
     text-align: center;
     margin-top: 50px;
 }
+
+table {
+    margin-top: 20px;
+    width: 100%; 
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+}
